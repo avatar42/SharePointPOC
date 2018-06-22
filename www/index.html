@@ -1,0 +1,628 @@
+<html>
+    <head>
+        <meta
+            http-equiv="Content-Security-Policy"
+            content="default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'; media-src *"
+        >
+        <meta
+            name="format-detection"
+            content="telephone=no"
+        >
+        <meta
+            name="msapplication-tap-highlight"
+            content="no"
+        >
+        <meta
+            name="viewport"
+            content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width"
+        >
+        <link rel="stylesheet" type="text/css" href="css/iconfont/material-icons.css">
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/index.css">
+        <link rel="stylesheet" type="text/css" href="css/sharepoint.css">
+        <link rel="stylesheet" type="text/css" href="css/topcoat-mobile-dark.min.css">
+        <script type="text/javascript">
+            function dprint(msg) {
+                dprint(msg, false);
+            }
+            
+            function dprint(msg, isError) {
+                // comment out to turn off all debug messages located here
+                isError ? console.error(msg) : console.log(msg);
+                var debugLog = document.getElementById('debugLog');
+                    //userlist.innerHTML = "Errors:";
+            
+                var logItem = document.createElement('li');
+                logItem.classList.add('topcoat-list__item');
+                if (isError) {
+                    logItem.classList.add('error-item');
+                }
+                logItem.innerText = msg;
+        
+                debugLog.appendChild(logItem);
+            }
+        </script>
+        <title>Cordova Menu</title>
+    </head>
+    <body>
+        <div id="overlay"></div>
+        <div id="sidemenu">
+            <div class="sidemenu-header">
+                <div>
+                    <a
+                        href="#"
+                        id="sidemenu-close"
+                    >
+                        <i class="material-icons">cancel</i>
+                    </a>
+                </div>
+            </div>
+            <ul class="options">
+                <li>
+                    <h2>Primary Views</h2>
+                </li>
+                <li class="active">
+                    <a
+                        href="javascript:jump('home');"
+                        class="cfx-topbar-menu"
+                        data-index="1"
+                    >
+                        <i
+                            data-index="1"
+                            class="material-icons"
+                        >
+                            home
+                        </i>
+                        Home
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="javascript:jump('note');"
+                        class="cfx-topbar-menu"
+                        data-index="2"
+                    >
+                        <i
+                            data-index="2"
+                            class="material-icons"
+                        >
+                            note
+                        </i>
+                        Scroll Example
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="javascript:jump('list');"
+                        class="cfx-topbar-menu"
+                        data-index="3"
+                    >
+                        <i
+                            data-index="3"
+                            class="material-icons"
+                        >
+                            list
+                        </i>
+                        List Example
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="javascript:jump('today');"
+                        class="cfx-topbar-menu"
+                        data-index="4"
+                    >
+                        <i
+                            data-index="4"
+                            class="material-icons"
+                        >
+                            today
+                        </i>
+                        Calendar Example
+                    </a>
+                </li>
+
+                <li>
+                    <h2>Secondary Views</h2>
+                </li>
+                <li>
+                    <a
+                        href="#"
+                        class="dashboard"
+                    >
+                        <i
+                            data-index="5"
+                            class="material-icons"
+                        >
+                            dashboard
+                        </i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="#"
+                        class="speaker_notes"
+                    >
+                        <i
+                            data-index="6"
+                            class="material-icons"
+                        >
+                            today
+                        </i>
+                        Raw response data
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="#"
+                        class="search"
+                    >
+                        <i
+                            data-index="7"
+                            class="material-icons"
+                        >
+                            search
+                        </i>
+                        Search
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="#"
+                        class="history"
+                    >
+                        <i
+                            data-index="8"
+                            class="material-icons"
+                        >
+                            history
+                        </i>
+                        Debug Log
+                    </a>
+                </li>
+                <li>
+                    <h2>Actions</h2>
+                </li>
+                <li id="loginItem" class="topcoat-list__item side-nav__list__item">
+                    <a href="javascript:app.login();">
+                        <i
+                            data-index="9"
+                            class="material-icons"
+                        >
+                            lock
+                        </i>
+                        Login
+                    </a>
+                </li>
+                <li class="topcoat-list__item side-nav__list__item">
+                    <a href="javascript:switchV();">
+                        <i
+                            data-index="10"
+                            class="material-icons"
+                        >
+                            settings
+                        </i>
+                        Toggle API version
+                    </a>
+                </li>
+                <li class="topcoat-list__item side-nav__list__item">
+                    <a href="javascript:navigator.app.exitApp();">
+                        <i
+                            data-index="11"
+                            class="material-icons"
+                        >
+                            power_settings_new
+                        </i>
+                        Exit
+                    </a>
+                </li>
+                <li class="topcoat-list__item side-nav__list__item">
+                    <a
+                        href="#"
+                        class="side-nav__button"
+                        id="create-context"
+                    >
+                        Create authentication context
+                    </a>
+                </li>
+                <li class="topcoat-list__item side-nav__list__item">
+                    <a
+                        href="#"
+                        class="side-nav__button"
+                        id="acquire-token"
+                    >
+                        Acquire token
+                    </a>
+                </li>
+                <li class="topcoat-list__item side-nav__list__item">
+                    <a
+                        href="#"
+                        class="side-nav__button"
+                        id="acquire-token-silent"
+                    >
+                        Acquire token silently
+                    </a>
+                </li>
+                <li class="topcoat-list__item side-nav__list__item">
+                    <a
+                        href="#"
+                        class="side-nav__button"
+                        id="read-tokencache"
+                    >
+                        Read cache items
+                    </a>
+                </li>
+                <li class="topcoat-list__item side-nav__list__item">
+                    <a
+                        href="#"
+                        class="side-nav__button"
+                        id="clear-tokencache"
+                    >
+                        Clear cache
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- cfx-topbar -->
+        <!-- See https://material.io/tools/icons/?style=baseline -->
+        <div
+            id="cfx-topbar"
+            data-index="4"
+        >
+            <ul id="cfx-topbar-menu">
+                <li>
+                    <a
+                        href="#"
+                        class="cfx-topbar-menu"
+                        data-index="0"
+                    >
+                        <i
+                            id="sidemenu-open"
+                            class="material-icons"
+                        >
+                            menu
+                        </i>
+                    </a>
+                </li>
+                <li class="active">
+                    <a
+                        href="javascript:jump('home');"
+                        class="cfx-topbar-menu"
+                        data-index="1"
+                    >
+                        <i
+                            data-index="1"
+                            class="material-icons"
+                        >
+                            home
+                        </i>
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="javascript:jump('note');"
+                        class="cfx-topbar-menu"
+                        data-index="2"
+                    >
+                        <i
+                            data-index="2"
+                            class="material-icons"
+                        >
+                            note
+                        </i>
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="javascript:jump('list');"
+                        class="cfx-topbar-menu"
+                        data-index="3"
+                    >
+                        <i
+                            data-index="3"
+                            class="material-icons"
+                        >
+                            list
+                        </i>
+                    </a>
+                </li>
+                <li>
+                    <a
+                        href="javascript:jump('today');"
+                        class="cfx-topbar-menu"
+                        data-index="4"
+                    >
+                        <i
+                            data-index="4"
+                            class="material-icons"
+                        >
+                            today
+                        </i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div
+            id="myCarousel"
+            class="carousel slide"
+            data-ride="carousel"
+            data-interval="false"
+        >
+            <div
+                class="carousel-inner"
+                role="listbox"
+            >
+                <div
+                    id="home"
+                    class="item view active"
+                >
+                    <div class="page-wrapper">
+                        <h2>Home</h2>
+                        <div class="app">
+                            <h1>Apache Cordova</h1>
+                            <div
+                                id="deviceready"
+                            >
+                                deviceready-def
+                            </div>
+                            <div id="appOpened">appOpened-undefined</div>
+                            <div id="apiVersion">Version unknown</div>
+                            <div id="loginStatus">Not logged in</div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    id="note"
+                    class="item view"
+                >
+                    <div class="page-wrapper">
+                        <h2>Page 2 scoll example</h2>
+                        <p>
+                            Lorem ipsum dolor sit amet, vix clita vitae debitis ne. Ut eros porro facete has, sed an recusabo delicatissimi, nam ei elit graeco dissentiet. Ex cum homero copiosae, id sed utamur consectetuer. Zril utamur in his, et dico movet munere sit, ea usu prima cetero tractatos. His no cibo illud, ei vidisse volutpat pro, erroribus repudiare ut per.
+                        </p>
+                        <p>
+                            No insolens euripidis moderatius duo, mea quando dignissim an. Cetero inermis ut vis, vim iracundia rationibus an. Ut qui malis quaestio, sea at brute mandamus. Eam cu bonorum delicata, vim sonet percipitur sadipscing no. Quot habeo erroribus vel ex.
+                        </p>
+                        <p>
+                            Eu cum menandri incorrupte, vis et doming legimus utroque. Mei at solum putant, sea ut omittam omittantur, amet saperet sit in. Nibh eloquentiam ea mel. Eum ad tollit impetus euripidis, corpora ponderum accommodare ut mel. Exerci constituam ex sit, elit dissentias pri eu, et has unum error habemus.
+                        </p>
+                        <p>
+                            Dicat labore dignissim mea ei, an similique reformidans adversarium usu. Cu inani possim everti pro, ea noster denique elaboraret nec, vituperata dissentiunt et nec. Sit ut ludus audire facilisis. Duo illud molestie oportere ei. Cum ad errem laoreet. Pri an amet etiam splendide, eam ex falli similique.
+                        </p>
+                        <p>
+                            Ea ipsum laudem dissentiunt has. Sumo causae ei nam, eruditi molestiae dissentiet mei te. Mazim alterum cu per, munere civibus et ius. Eripuit apeirian at eum, est et nisl erat patrioque, labores omnesque salutandi ius id. Cu prodesset disputationi cum.
+                        </p>
+                        <p>
+                            Lorem ipsum dolor sit amet, vix clita vitae debitis ne. Ut eros porro facete has, sed an recusabo delicatissimi, nam ei elit graeco dissentiet. Ex cum homero copiosae, id sed utamur consectetuer. Zril utamur in his, et dico movet munere sit, ea usu prima cetero tractatos. His no cibo illud, ei vidisse volutpat pro, erroribus repudiare ut per.
+                        </p>
+                        <p>
+                            No insolens euripidis moderatius duo, mea quando dignissim an. Cetero inermis ut vis, vim iracundia rationibus an. Ut qui malis quaestio, sea at brute mandamus. Eam cu bonorum delicata, vim sonet percipitur sadipscing no. Quot habeo erroribus vel ex.
+                        </p>
+                        <p>
+                            Eu cum menandri incorrupte, vis et doming legimus utroque. Mei at solum putant, sea ut omittam omittantur, amet saperet sit in. Nibh eloquentiam ea mel. Eum ad tollit impetus euripidis, corpora ponderum accommodare ut mel. Exerci constituam ex sit, elit dissentias pri eu, et has unum error habemus.
+                        </p>
+                        <p>
+                            Dicat labore dignissim mea ei, an similique reformidans adversarium usu. Cu inani possim everti pro, ea noster denique elaboraret nec, vituperata dissentiunt et nec. Sit ut ludus audire facilisis. Duo illud molestie oportere ei. Cum ad errem laoreet. Pri an amet etiam splendide, eam ex falli similique.
+                        </p>
+                        <p>
+                            Ea ipsum laudem dissentiunt has. Sumo causae ei nam, eruditi molestiae dissentiet mei te. Mazim alterum cu per, munere civibus et ius. Eripuit apeirian at eum, est et nisl erat patrioque, labores omnesque salutandi ius id. Cu prodesset disputationi cum.
+                        </p>
+                        <p>
+                            Lorem ipsum dolor sit amet, vix clita vitae debitis ne. Ut eros porro facete has, sed an recusabo delicatissimi, nam ei elit graeco dissentiet. Ex cum homero copiosae, id sed utamur consectetuer. Zril utamur in his, et dico movet munere sit, ea usu prima cetero tractatos. His no cibo illud, ei vidisse volutpat pro, erroribus repudiare ut per.
+                        </p>
+                        <p>
+                            No insolens euripidis moderatius duo, mea quando dignissim an. Cetero inermis ut vis, vim iracundia rationibus an. Ut qui malis quaestio, sea at brute mandamus. Eam cu bonorum delicata, vim sonet percipitur sadipscing no. Quot habeo erroribus vel ex.
+                        </p>
+                        <p>
+                            Eu cum menandri incorrupte, vis et doming legimus utroque. Mei at solum putant, sea ut omittam omittantur, amet saperet sit in. Nibh eloquentiam ea mel. Eum ad tollit impetus euripidis, corpora ponderum accommodare ut mel. Exerci constituam ex sit, elit dissentias pri eu, et has unum error habemus.
+                        </p>
+                        <p>
+                            Dicat labore dignissim mea ei, an similique reformidans adversarium usu. Cu inani possim everti pro, ea noster denique elaboraret nec, vituperata dissentiunt et nec. Sit ut ludus audire facilisis. Duo illud molestie oportere ei. Cum ad errem laoreet. Pri an amet etiam splendide, eam ex falli similique.
+                        </p>
+                        <p>
+                            Ea ipsum laudem dissentiunt has. Sumo causae ei nam, eruditi molestiae dissentiet mei te. Mazim alterum cu per, munere civibus et ius. Eripuit apeirian at eum, est et nisl erat patrioque, labores omnesque salutandi ius id. Cu prodesset disputationi cum.
+                        </p>
+                    </div>
+                </div>
+                <div
+                    id="list"
+                    class="item view"
+                >
+                    <div class="page-wrapper">
+                        <h2>Page 3 List example</h2>
+                        <div class="w3-white w3-padding">
+                            <div class="topcoat-list__container scroller">
+                                <ul
+                                    class="topcoat-list list"
+                                    id="userlist"
+                                ></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    id="today"
+                    class="item view"
+                >
+                    <div class="page-wrapper">
+                        <a name="today"></a>
+                        <h2>Page 4 Calendar example</h2>
+                        <iframe
+                            src="https://calendar.google.com/calendar/embed?title=Scheduled%20time&mode=WEEK&height=600&wkst=1&bgcolor=%23FFFFFF&src=deabigt%40gmail.com&color=%2329527A&src=kd46fgvscq0ld2a90vvc1mc8e4%40group.calendar.google.com&color=%2342104A&src=en.usa%23holiday%40group.v.calendar.google.com&color=%230F4B38&src=n7ottgmc4oeq06hgmtbklq5bl4%40group.calendar.google.com&color=%231B887A&src=ei90rv9ggaehf0se1hd6nt8kl8%40group.calendar.google.com&color=%23B1440E&src=ekviqsljrubhfitpbsa6crvr3g%40group.calendar.google.com&color=%232952A3&src=24sv3eak8lpdb26n5pknou5ni8%40group.calendar.google.com&color=%23875509&ctz=America%2FChicago"
+                            style="border:solid 1px #777"
+                            width="100%"
+                            height="100%"
+                            frameborder="0"
+                            scrolling="no"
+                        ></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div
+            id="dashboard"
+            class="secondary-view"
+        >
+            <div class="secondary-view-toolbar">
+                <div
+                    class="navbar"
+                    data-role="navbar"
+                >
+                    <ul class="cfx-menu">
+                        <li class="back-button">
+                            <a
+                                href="javascript:exitSecondaryView('dashboard');"
+                                class="back"
+                            >
+                                <i class="material-icons">arrow_back</i>
+                                <br>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="page-wrapper">
+                <h4>dashboard</h4>
+                <div class="content-wrapper">
+                    A secondary view page for holding dashboard info
+                </div>
+            </div>
+        </div>
+
+        <div
+            id="speaker_notes"
+            class="secondary-view"
+        >
+            <div class="secondary-view-toolbar">
+                <div
+                    class="navbar"
+                    data-role="navbar"
+                >
+                    <ul class="cfx-menu">
+                        <li class="back-button">
+                            <a
+                                href="javascript:exitSecondaryView('speaker_notes');"
+                                class="back"
+                            >
+                                <i class="material-icons">arrow_back</i>
+                                <br>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="page-wrapper">
+                <h4>Raw response data</h4>
+                <div class="content-wrapper">
+                    <div id="rawResponse"></div>
+                </div>
+            </div>
+        </div>
+        <div
+            id="search"
+            class="secondary-view"
+        >
+            <div class="secondary-view-toolbar">
+                <div
+                    class="navbar"
+                    data-role="navbar"
+                >
+                    <ul class="cfx-menu">
+                        <li class="back-button">
+                            <a
+                                href="javascript:exitSecondaryView('search');"
+                                class="back"
+                            >
+                                <i class="material-icons">arrow_back</i>
+                                <br>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="page-wrapper">
+                <h4>Search</h4>
+                <div class="content-wrapper">
+                    <div class="searchpanel">
+                        <div class="searchinput">
+                            <input
+                                class="topcoat-search-input full"
+                                id="searchfield"
+                                type="search"
+                                placeholder="Enter an alias..."
+                            >
+                        </div>
+                        <div class="searchbutton">
+                            <button
+                                class="topcoat-button-bar__button topcoat-button--cta"
+                                id="searchButton"
+                            >
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div
+            id="history"
+            class="secondary-view"
+        >
+            <div class="secondary-view-toolbar">
+                <div
+                    class="navbar"
+                    data-role="navbar"
+                >
+                    <ul class="cfx-menu">
+                        <li class="back-button">
+                            <a
+                                href="javascript:exitSecondaryView('history');"
+                                class="back"
+                            >
+                                <i class="material-icons">arrow_back</i>
+                                <br>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="page-wrapper">
+                <h4>Debug Log</h4>
+                <div class="content-wrapper">
+                    <div class="topcoat-list__container scroller">
+                        <ul
+                            class="topcoat-list list"
+                            id="debugLog"
+                        ></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script
+            type="text/javascript"
+            src="cordova.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="js/jquery.min.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="js/bootstrap.min.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="js/jquery.touchSwipe.min.js"
+        ></script>
+        <!-- script
+            type="text/javascript"
+            src="js/sharepoint.js"
+        ></script -->
+        <script
+            type="text/javascript"
+            src="js/index.js"
+        ></script>
+    </body>
+</html>

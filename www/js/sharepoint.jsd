@@ -1,0 +1,345 @@
+var useV2 = false; // use newer graph API instead of limited Azure API
+
+var authority = "",
+    redirectUri = "",
+    resourceUri = "",
+    clientId = "",
+    graphApiVersion = "",
+    accessToken = "";
+
+function switchV2() {
+    dprint("Calling switchV2");
+    authority = "https://login.microsoftonline.com/organizations/oauth2/v2.0/authorize";
+    redirectUri = "https://citizant.sharepoint.com";
+    resourceUri = "https://graph.microsoft.com";
+    clientId = "10a2d9f2-3571-4209-be4e-cf65ff348b36";
+    graphApiVersion = "v1.0";
+    useV2 = true;
+}
+
+function switchV1() {
+    dprint("Calling switchV1");
+    authority = "https://login.windows.net/common";
+    redirectUri = "https://citizant.sharepoint.com";
+    resourceUri = "https://graph.windows.net";
+    clientId = "10a2d9f2-3571-4209-be4e-cf65ff348b36";
+    graphApiVersion = "2013-11-08";
+    useV2 = false;
+}
+
+function switchV() {
+    if (useV2) {
+        switchV1();
+        document.getElementById('apiVersion').innerHTML = "Using V1 API";
+        dprint("API swtiched to version 1");
+    } else {
+        switchV2()
+        document.getElementById('apiVersion').innerHTML = "Using V2 API";
+        dprint("API swtiched to version 2");
+    }
+}
+
+// Implements search operations.
+
+$(document).on('click', '#searchButton', function (e) {
+    e.preventDefault();
+    dprint('Received Event: click#searchButton');
+    search();
+});
+dprint("searchButton event listener installed");
+
+function search() {
+    dprint("search");
+    document.getElementById('userlist').innerHTML = "";
+
+    var resp = authenticate(function (authresult) {
+        dprint('Entering search.authenticate');
+        var url = "";
+        var searchText = document.getElementById('searchfield').value;
+
+        if (useV2) {
+            // graph.windows.com
+            url = resourceUri + "/" + graphApiVersion + "/me/";
+        } else {
+            // graph.windows.net has no includes or other "like" op. See https://msdn.microsoft.com/en-us/library/azure/ad/graph/howto/azure-ad-graph-api-supported-queries-filters-and-paging-options
+            // url = resourceUri + "/" + authResult.tenantId + "/tenantDetails?api-version=" + graphApiVersion;
+
+            url = resourceUri + "/" + authResult.tenantId + "/users?api-version=" + graphApiVersion;
+
+            url = searchText ? url + "&$filter=startswith(displayName,'" + searchText + "')" : url + "&$orderby=displayName&$top=10";
+            // url = searchText ? url + "&$filter=mailNickname eq '" + searchText + "'" : url + "&$top=10";
+        }
+        dprint('Calling requestData(authresult, ' + url + ')');
+        requestData(authresult, url);
+    });
+    dprint("Leaving search:" + resp);
+}
+
+function login() {
+    dprint("Entering login");
+    var resp = auth(function (authResponse) {
+        dprint("Token acquired: " + authResponse.accessToken);
+        dprint("Token will expire on: " + authResponse.expiresOn);
+    }, function (err) {
+        dprint("Failed to authenticate: " + err);
+    });
+    dprint("After Auth:" + resp);
+    resp = authenticate(function (authresult) {
+        dprint("authresult:" + authresult.accessToken + " Expires:" + authresult.expiresOn);
+        var url = "";
+        if (useV2) {
+            // graph.windows.com
+            url = resourceUri + "/" + graphApiVersion + "/me/";
+        } else {
+            url = resourceUri + "/" + authResult.tenantId + "/me?api-version=" + graphApiVersion;
+        }
+        dprint('Bearer ' + authResult.accessToken);
+        requestData(authresult, url);
+        dprint("Switching menu to logout");
+        document.getElementById('loginItem').innerHTML = '<a href="javascript:logout();"><i data-index="9" class="material-icons">unlock</i> Logout</a>';
+        document.getElementById('loginStatus').innerHTML = 'Logged in as:';
+    }, function (err) {
+        dprint("Failed to authenticate: " + err, true);
+    });
+    dprint("Leaving login:" + resp);
+}
+function listTokens(context) {
+    context.tokenCache.readItems().then(function (items) {
+        dprint("items.length: " + items.length);
+        items.forEach(function (item, idx) {
+            adprint("item: " + idx + ":" + item.authority + " expiresOn: " + item.expiresOn + " accessToken: " + item.accessToken + " clientId: " + item.clientId + " tenantId: " + item.tenantId + " userInfo: " + item.userInfo.givenName);
+        })
+    });
+}
+
+function logout() {
+    dprint("logout");
+    var authContext = new Microsoft.ADAL.AuthenticationContext(authority);
+    dprint("items in tokenCache before clear : ");
+    listTokens(authContext);
+    authContext.tokenCache.clear();
+    var req = new XMLHttpRequest();
+    var url = "";
+    if (useV2) {
+        // graph.windows.com
+        url = resourceUri + "/" + graphApiVersion + "/me/";
+    } else {
+        url = resourceUri + "/" + authResult.tenantId + "oauth2/logout?post_logout_redirect_uri=" + redirectUri;
+    }
+
+    req.open("GET", url, true);
+    document.getElementById('rawResponse').innerHTML = "";
+
+    req.onload = function (e) {
+        if (e.target.status >= 200 && e.target.status < 300) {
+            dprint("Switching menu to login");
+            document.getElementById('loginItem').innerHTML = '<a href="javascript:login();"><i data-index="9" class="material-icons">lock</i> Login</a>';
+            document.getElementById('loginStatus').innerHTML = 'Logged out at:' + new Date().toLocaleTimeString();
+            return;
+        }
+        document.getElementById('rawResponse').innerHTML = e.target.response;
+        error('logout request failed: ' + e.target.response);
+    };
+    req.onerror = function (e) {
+        error('logout request failed: ' + e.error);
+    }
+
+    req.send();
+
+    dprint("items in tokenCache after clear : ");
+    listTokens(authContext);
+}
+
+// Shows user authentication dialog if required.
+function authenticate(authCompletedCallback) {
+    dprint("Entering authenticate");
+    if (useV2) {
+        switchV2();
+    } else {
+        switchV1();
+    }
+    dprint("Calling:Microsoft.ADAL.AuthenticationContext");
+    context = new Microsoft.ADAL.AuthenticationContext(authority);
+    dprint("context.tokenCache.readItems():");
+    listTokens(context);
+    context.tokenCache.readItems().then(function (items) {
+        if (items.length > 0) {
+            authority = items[0].authority;
+            dprint("items[0].authority: " + authority);
+            context = new Microsoft.ADAL.AuthenticationContext(authority);
+            dprint("context: " + context);
+        }
+        dprint("Calling:context.acquireTokenSilentAsync(" + resourceUri + "," + clientId + ")");
+        dprint("Attempt to authorize user silently");
+        context.acquireTokenSilentAsync(resourceUri, clientId)
+            .then(authCompletedCallback, function () {
+                dprint("We require user cridentials so triggers authentication dialog");
+                context.acquireTokenAsync(resourceUri, clientId, redirectUri)
+                    .then(authCompletedCallback, function (err) {
+                        error("Failed to authenticate: " + err);
+                    });
+                //dprint("After context.acquireTokenAsync: " + context.toString);
+            });
+        //dprint("After context.acquireTokenSilentAsync: " + context.toString);
+    });
+    //dprint("Leaving authenticate");
+    //listTokens(context);
+
+}
+// Makes Api call to receive user list.
+function requestData(authResult, url) {
+    dprint("C-Calling:" + url);
+    var req = new XMLHttpRequest();
+
+    req.open("GET", url, true);
+    req.setRequestHeader('Authorization', 'Bearer ' + authResult.accessToken);
+    document.getElementById('rawResponse').innerHTML = "";
+
+    req.onload = function (e) {
+        if (e.target.status >= 200 && e.target.status < 300) {
+            dprint("C-Response:" + e.target.response);
+            document.getElementById('rawResponse').innerHTML = e.target.response;
+            var data = JSON.parse(e.target.response);
+            dprint("C-data:" + Object.prototype.toString.call(data).slice(8, -1) + ":" + data);
+            if (!data) {
+                error("Unable to parse:" + json);
+                return;
+            }
+            var dataType = data && Object.keys(data)[0];
+            dprint("C-dataType:" + Object.prototype.toString.call(dataType).slice(8, -1) + ":" + dataType);
+
+            renderUserListData(data);
+            return;
+        }
+        document.getElementById('rawResponse').innerHTML = e.target.response;
+        error('Data request failed: ' + e.target.response);
+    };
+    req.onerror = function (e) {
+        error('Data request failed: ' + e.error);
+    }
+
+    req.send();
+}
+// Renders user list.
+function renderUserListData(data) {
+    var users = data && data.value;
+    dprint("C-users:" + Object.prototype.toString.call(users).slice(8, -1) + ":" + users);
+    if (!users || users.length === 0) {
+        error("No users found");
+        return;
+    }
+
+    var userlist = document.getElementById('userlist');
+    userlist.innerHTML = "";
+
+    // Helper function for generating HTML
+    function $new(eltName, classlist, innerText, children, attributes) {
+        var elt = document.createElement(eltName);
+        classlist.forEach(function (className) {
+            elt.classList.add(className);
+        });
+
+        if (innerText) {
+            elt.innerText = innerText;
+        }
+
+        if (children && children.constructor === Array) {
+            children.forEach(function (child) {
+                elt.appendChild(child);
+            });
+        } else if (children instanceof HTMLElement) {
+            elt.appendChild(children);
+        }
+
+        if (attributes && attributes.constructor === Object) {
+            for (var attrName in attributes) {
+                elt.setAttribute(attrName, attributes[attrName]);
+            }
+        }
+
+        return elt;
+    }
+
+    users.map(function (userInfo) {
+        return $new('li', ['topcoat-list__item'], null, [
+            $new('div', [], null, [
+                $new('p', ['userinfo-label'], 'First name: '),
+                $new('input', ['topcoat-text-input', 'userinfo-data-field'], null, null, {
+                    type: 'text',
+                    readonly: '',
+                    placeholder: '',
+                    value: userInfo.givenName || ''
+                })
+            ]),
+            $new('div', [], null, [
+                $new('p', ['userinfo-label'], 'Last name: '),
+                $new('input', ['topcoat-text-input', 'userinfo-data-field'], null, null, {
+                    type: 'text',
+                    readonly: '',
+                    placeholder: '',
+                    value: userInfo.surname || ''
+                })
+            ]),
+            $new('div', [], null, [
+                $new('p', ['userinfo-label'], 'UPN: '),
+                $new('input', ['topcoat-text-input', 'userinfo-data-field'], null, null, {
+                    type: 'text',
+                    readonly: '',
+                    placeholder: '',
+                    value: userInfo.userPrincipalName || ''
+                })
+            ]),
+            $new('div', [], null, [
+                $new('p', ['userinfo-label'], 'Phone: '),
+                $new('input', ['topcoat-text-input', 'userinfo-data-field'], null, null, {
+                    type: 'text',
+                    readonly: '',
+                    placeholder: '',
+                    value: userInfo.telephoneNumber || ''
+                })
+            ])
+        ]);
+    }).forEach(function (userListItem) {
+        userlist.appendChild(userListItem);
+    });
+}
+function log(message, isError) {
+    dprint(message, isError);
+    var logItem = document.createElement('li');
+    logItem.classList.add("topcoat-list__item");
+    isError && logItem.classList.add("error-item");
+    var timestamp = '<span class="timestamp">' + new Date().toLocaleTimeString() + ': </span>';
+    logItem.innerHTML = (timestamp + message);
+    logArea.insertBefore(logItem, logArea.firstChild);
+}
+// Renders application error.
+function error(err) {
+    dprint("Error: " + err);
+    window.plugins.toast.showWithOptions({
+        message: err,
+        duration: "short", // which is 2000 ms. "long" is 4000. Or specify the nr of ms yourself.
+        position: "bottom",
+        addPixelsY: -40  // added a negative value to move it up a bit (default 0)
+    });
+}
+
+
+$(document).ready(function () {
+    dprint('sharepoint.document.ready');
+    if (useV2) {
+        document.getElementById('apiVersion').innerHTML = "Using V2 API";
+    } else {
+        document.getElementById('apiVersion').innerHTML = "Using V1 API";
+    }
+
+    // not in this version if adal lib
+    // new Microsoft.ADAL.AuthenticationSettings.setLogLevel(3).then(() => {
+    //     dprint("Successfully set log level");
+    //     new Microsoft.ADAL.AuthenticationSettings.setLogger(function (logItem) {
+    //         dprint(JSON.stringify(logItem, null, 2));
+    //     });
+    // }, (err) => {
+    //     dprint("Couldn't set log level");
+    // })
+
+});

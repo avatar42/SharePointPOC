@@ -1,0 +1,32 @@
+{
+    "name": "com.dea42.sharepointpoc",
+    "displayName": "SharepointPOC",
+    "version": "1.0.0",
+    "description": "A sample Apache Cordova application that responds to the deviceready event.",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Apache Cordova Team",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "cordova": "^8.0.0",
+        "cordova-android": "^7.0.0",
+        "cordova-plugin-compat": "^1.2.0",
+        "cordova-plugin-ms-adal": "^0.10.1",
+        "cordova-plugin-whitelist": "^1.3.3",
+        "cordova-plugin-x-toast": "git+https://github.com/EddyVerbruggen/Toast-PhoneGap-Plugin.git",
+        "cordova-serve": "^2.0.0",
+        "cordova-simulate": "^0.3.14"
+    },
+    "cordova": {
+        "plugins": {
+            "cordova-plugin-whitelist": {},
+            "cordova-plugin-ms-adal": {},
+            "cordova-plugin-x-toast": {}
+        },
+        "platforms": [
+            "android"
+        ]
+    }
+}
