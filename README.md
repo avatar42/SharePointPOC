@@ -1,6 +1,8 @@
 # SharepointPOC
 Example of top and side nave in single app based on [this set of blog posts](http://codingfix.com/cordova-application-navigation-system/).
 
+**Note this a POC from 2018 and pom.xml needs updating to newer versions of tools if planning to use. See Github alerts.**
+
 
 Most of the libs and APIs required are included in the repo to make things easier.
 Tools I have installed:
